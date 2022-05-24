@@ -1,0 +1,27 @@
+stages:
+- stage: build_hello_api
+  displayName: Build Hello Api Function
+  dependsOn: []
+  pool:
+    vmImage: 'ubuntu-latest'
+  jobs:
+  - job: Build
+    displayName: 'Build'
+    steps:
+    - task: UseDotNet@2
+      displayName: 'Install .NET SDK 6.x'
+      inputs:
+        packageType: 'sdk'
+        version: 6.x
+        
+    - task: DotNetCoreCLI@2
+      displayName: 'Hello FunctionApp dotnet publish'
+      inputs:
+        command: publish
+        arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/Hello.Functions /p:SourceRevisionId=$(Build.SourceVersion)'
+        zipAfterPublish: true
+        publishWebProjects: false
+        workingDirectory: src/Hello.Functions
+        
+    - publish: $(Build.ArtifactStagingDirectory)/Hello.Functions
+      artifact: Hello.Functions
